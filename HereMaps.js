@@ -56,7 +56,7 @@ class HereMaps extends React.Component {
         this.setState({ lastLocation: location })
       }
       clearInterval(timer);
-    }, 10);
+    }, 100);
   }
 
   render() {
@@ -70,27 +70,6 @@ class HereMaps extends React.Component {
           center={this.props.center}
           mapType={this.props.mapType}
           initialZoom={this.props.initialZoom} >
-
-          <View style={{
-            position: 'absolute', top: 10, right: 10,
-            width: 50, height: 120,
-            backgroundColor: 'yellow',
-            justifyContent: 'space-between'
-          }}>
-
-            <Button
-              title="+"
-              onPress={this.onZoomInPress} />
-
-            <Button
-              title="-"
-              onPress={this.onZoomOutPress} />
-
-            <Button
-              title="o"
-              onPress={this.onSetCenterPress} />
-
-          </View>
         </HereMapView>
       </View>
     );

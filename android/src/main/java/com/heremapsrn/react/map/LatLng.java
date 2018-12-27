@@ -10,6 +10,6 @@ public class LatLng {
 
     @Override
     public String toString() {
-        return "{\"lat\":" + lat + ",\"lng\":" + lng+"}";
+        return "{\"latitude\":" + lat + ",\"longitude\":" + lng+"}";
     }
 }
