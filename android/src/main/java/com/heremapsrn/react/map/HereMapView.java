@@ -10,6 +10,7 @@ import com.here.android.mpa.mapping.Map;
 import com.here.android.mpa.mapping.MapMarker;
 import com.here.android.mpa.mapping.MapState;
 import com.here.android.mpa.mapping.MapView;
+import com.here.android.mpa.mapping.PositionIndicator;
 import com.heremapsrn.R;
 
 import java.io.IOException;
@@ -53,6 +54,15 @@ public class HereMapView extends MapView {
 
                     map.setMapScheme(Map.Scheme.NORMAL_DAY);
 
+                    com.here.android.mpa.common.Image myImage = new com.here.android.mpa.common.Image();
+                    try {
+                        myImage.setImageResource(R.mipmap.ic_location);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    map.getPositionIndicator().setMarker(myImage);
+                    map.getPositionIndicator().setVisible(true);
+
                     mapIsReady = true;
 
                     if (center != null) map.setCenter(mapCenter, Map.Animation.LINEAR);
@@ -83,7 +93,7 @@ public class HereMapView extends MapView {
 
             @Override
             public void onMapTransformEnd(MapState mapState) {
-                if(callback != null){
+                if (callback != null) {
                     callback.onCallback(getMapCenter());
                 }
             }
@@ -91,7 +101,7 @@ public class HereMapView extends MapView {
         map.addTransformListener(onTransformListener);
     }
 
-    public LatLng getMapCenter(){
+    public LatLng getMapCenter() {
         GeoCoordinate center = map.getCenter();
         return new LatLng(center.getLatitude(), center.getLongitude());
     }
@@ -120,7 +130,6 @@ public class HereMapView extends MapView {
             mapCenter = new GeoCoordinate(latitude, longitude);
             if (mapIsReady && map != null) {
                 map.setCenter(mapCenter, Map.Animation.LINEAR);
-//                updateCenterPin(mapCenter);
 
             }
         } else {
@@ -139,6 +148,9 @@ public class HereMapView extends MapView {
         }
     }
 
+    public void setEnable(boolean isEnable) {
+    }
+
     public void setZoomLevel(double zoomLevel) {
         this.zoomLevel = zoomLevel;
         if (!mapIsReady) return;
@@ -146,19 +158,32 @@ public class HereMapView extends MapView {
         map.setZoomLevel(zoomLevel);
     }
 
-    public void updateCenterPin(GeoCoordinate pin) {
-        // Create a custom marker image
-        com.here.android.mpa.common.Image myImage = new com.here.android.mpa.common.Image();
-        try {
-            myImage.setImageResource(R.mipmap.ic_pin_map1);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void addMaker(String _maker) {
+        String[] values = _maker.split(",");
 
-        if (currentPin != null) {
-            map.removeMapObject(currentPin);
+        if (values.length == 2) {
+            double latitude = Double.parseDouble(values[0]);
+            double longitude = Double.parseDouble(values[1]);
+
+            GeoCoordinate maker = new GeoCoordinate(latitude, longitude);
+            if (mapIsReady && map != null) {
+                // Create a custom marker image
+                com.here.android.mpa.common.Image myImage = new com.here.android.mpa.common.Image();
+                try {
+                    myImage.setImageResource(R.mipmap.ic_pin_map);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                if (currentPin != null) {
+                    map.removeMapObject(currentPin);
+                }
+                currentPin = new MapMarker(maker, myImage);
+                map.addMapObject(currentPin);
+
+            }
+        } else {
+            Log.w(TAG, String.format("Invalid center: %s", _maker));
         }
-        currentPin = new MapMarker(pin, myImage);
-        map.addMapObject(currentPin);
     }
 }

@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import {
   View,
-  Button,
   NativeModules,
   requireNativeComponent,
   findNodeHandle,
@@ -41,11 +40,13 @@ class HereMaps extends React.Component {
     if (isReady) {
     }
 
-    const EVENT_NAME = new NativeEventEmitter(UIManager);
-    this.subscription = EVENT_NAME.addListener('HERE_MAP_ON_CHANGED',
-      (location) => {
-        this.countdownTimer(location)
-      });
+    if(this.props.enable){
+      const EVENT_NAME = new NativeEventEmitter(UIManager);
+      this.subscription = EVENT_NAME.addListener('HERE_MAP_ON_CHANGED',
+        (location) => {
+          this.countdownTimer(location)
+        });
+    }
   }
 
   countdownTimer = (location) => {
@@ -68,6 +69,8 @@ class HereMaps extends React.Component {
         <HereMapView
           style={this.props.style}
           center={this.props.center}
+          maker={this.props.maker}
+          enable={this.props.enable}
           mapType={this.props.mapType}
           initialZoom={this.props.initialZoom} >
         </HereMapView>
@@ -111,6 +114,8 @@ HereMaps.propTypes = {
   ...ViewPropTypes, // include the default view properties
   style: ViewPropTypes.style,
   center: PropTypes.string,
+  maker: PropTypes.string,
+  enable: PropTypes.bool,
   mapType: PropTypes.oneOf(Object.values(MAP_TYPES)),
   initialZoom: PropTypes.number
 };
