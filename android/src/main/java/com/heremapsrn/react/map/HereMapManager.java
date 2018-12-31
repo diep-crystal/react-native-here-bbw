@@ -54,7 +54,7 @@ class HereMapManager extends ViewGroupManager<HereMapView> {
                 "zoomIn", COMMAND_ZOOM_IN,
                 "zoomOut", COMMAND_ZOOM_OUT,
                 "setCenter", COMMAND_SET_CENTER,
-                "addMarker", COMMAND_ADD_MAKER
+                "addMaker", COMMAND_ADD_MAKER
         );
     }
 
@@ -116,14 +116,7 @@ class HereMapManager extends ViewGroupManager<HereMapView> {
     }
 
     @ReactProp(name = "maker")
-    public void addMaker(HereMapView view, String maker) {
-        if (maker != null && maker.length() > 0) {
-            view.addMaker(maker);
-        }
-    }
-
-    @ReactProp(name = "enable")
-    public void setEnable(HereMapView view, boolean enable) {
-        view.setEnable(enable);
+    public void addMaker(HereMapView view, @Nullable String maker) {
+        view.addMaker(maker);
     }
 }
