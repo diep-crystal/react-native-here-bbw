@@ -1,6 +1,7 @@
 package com.heremapsrn.react.map;
 
 import android.content.Context;
+import android.graphics.PointF;
 import android.util.Log;
 
 import com.here.android.mpa.common.GeoCoordinate;
@@ -54,24 +55,18 @@ public class HereMapView extends MapView {
 
                     map.setMapScheme(Map.Scheme.NORMAL_DAY);
 
-                    com.here.android.mpa.common.Image myImage = new com.here.android.mpa.common.Image();
-                    try {
-                        myImage.setImageResource(R.mipmap.ic_location);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    map.getPositionIndicator().setMarker(myImage);
-                    map.getPositionIndicator().setVisible(true);
-
                     mapIsReady = true;
 
                     if (center != null) map.setCenter(mapCenter, Map.Animation.LINEAR);
+
+                    enableMyLocation();
 
                     Log.d(TAG, String.format("mapType: %s", mapType));
                     setMapType(mapType);
 
                     setZoomLevel(zoomLevel);
 
+                    updatePin();
                     initControl();
 
                 } else {
@@ -130,7 +125,6 @@ public class HereMapView extends MapView {
             mapCenter = new GeoCoordinate(latitude, longitude);
             if (mapIsReady && map != null) {
                 map.setCenter(mapCenter, Map.Animation.LINEAR);
-
             }
         } else {
             Log.w(TAG, String.format("Invalid center: %s", center));
@@ -148,9 +142,6 @@ public class HereMapView extends MapView {
         }
     }
 
-    public void setEnable(boolean isEnable) {
-    }
-
     public void setZoomLevel(double zoomLevel) {
         this.zoomLevel = zoomLevel;
         if (!mapIsReady) return;
@@ -158,32 +149,50 @@ public class HereMapView extends MapView {
         map.setZoomLevel(zoomLevel);
     }
 
-    public void addMaker(String _maker) {
-        String[] values = _maker.split(",");
+    public void updatePin(){
+        if (map != null) {
+            if (currentPin != null) {
+                map.removeMapObject(currentPin);
+            }
+            map.addMapObject(currentPin);
+        }
+    }
+
+    public void addMarker(String _marker) {
+        String[] values = _marker.split(",");
 
         if (values.length == 2) {
             double latitude = Double.parseDouble(values[0]);
             double longitude = Double.parseDouble(values[1]);
 
-            GeoCoordinate maker = new GeoCoordinate(latitude, longitude);
-            if (mapIsReady && map != null) {
-                // Create a custom marker image
-                com.here.android.mpa.common.Image myImage = new com.here.android.mpa.common.Image();
-                try {
-                    myImage.setImageResource(R.mipmap.ic_pin_map);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            GeoCoordinate geo = new GeoCoordinate(latitude, longitude);
 
-                if (currentPin != null) {
-                    map.removeMapObject(currentPin);
-                }
-                currentPin = new MapMarker(maker, myImage);
-                map.addMapObject(currentPin);
-
+            com.here.android.mpa.common.Image myImage = new com.here.android.mpa.common.Image();
+            try {
+                myImage.setImageResource(R.mipmap.ic_pin_map);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+
+            currentPin = new MapMarker(geo, myImage);
+            currentPin.setAnchorPoint(new PointF(myImage.getWidth()/2, myImage.getHeight()));
+            updatePin();
+
         } else {
-            Log.w(TAG, String.format("Invalid center: %s", _maker));
+            Log.w(TAG, String.format("Invalid maker: %s", _marker));
         }
+    }
+
+    public void enableMyLocation() {
+        // Create a custom marker image
+        com.here.android.mpa.common.Image myImage = new com.here.android.mpa.common.Image();
+        try {
+            myImage.setImageResource(R.mipmap.ic_location);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        map.getPositionIndicator().setVisible(true);
+        map.getPositionIndicator().setMarker(myImage);
     }
 }
