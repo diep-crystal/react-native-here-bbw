@@ -24,7 +24,7 @@ class HereMapManager extends ViewGroupManager<HereMapView> {
     private static final int COMMAND_ZOOM_IN = 1;
     private static final int COMMAND_ZOOM_OUT = 2;
     private static final int COMMAND_SET_CENTER = 3;
-    private static final int COMMAND_ADD_MAKER = 4;
+    private static final int COMMAND_ADD_MARKER = 4;
 
     static final String REACT_CLASS = "HereMapView";
 
@@ -54,7 +54,7 @@ class HereMapManager extends ViewGroupManager<HereMapView> {
                 "zoomIn", COMMAND_ZOOM_IN,
                 "zoomOut", COMMAND_ZOOM_OUT,
                 "setCenter", COMMAND_SET_CENTER,
-                "addMaker", COMMAND_ADD_MAKER
+                "addMarker", COMMAND_ADD_MARKER
         );
     }
 
@@ -85,9 +85,9 @@ class HereMapManager extends ViewGroupManager<HereMapView> {
                 return;
             }
 
-            case COMMAND_ADD_MAKER: {
+            case COMMAND_ADD_MARKER: {
                 String coordinate = args.getString(0);
-                view.addMaker(coordinate);
+                view.addMarker(coordinate);
                 return;
             }
 
@@ -115,8 +115,8 @@ class HereMapManager extends ViewGroupManager<HereMapView> {
         view.setZoomLevel(zoomLevel);
     }
 
-    @ReactProp(name = "maker")
-    public void addMaker(HereMapView view, @Nullable String maker) {
-        view.addMaker(maker);
+    @ReactProp(name = "marker")
+    public void addMarker(HereMapView view, @Nullable String marker) {
+        view.addMarker(marker);
     }
 }

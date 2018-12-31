@@ -68,7 +68,7 @@ class HereMaps extends React.Component {
         <HereMapView
           style={this.props.style}
           center={this.props.center}
-          maker={this.props.maker}
+          marker={this.props.marker}
           mapType={this.props.mapType}
           initialZoom={this.props.initialZoom} >
         </HereMapView>
@@ -112,7 +112,7 @@ HereMaps.propTypes = {
   ...ViewPropTypes, // include the default view properties
   style: ViewPropTypes.style,
   center: PropTypes.string,
-  maker: PropTypes.string,
+  marker: PropTypes.string,
   mapType: PropTypes.oneOf(Object.values(MAP_TYPES)),
   initialZoom: PropTypes.number
 };

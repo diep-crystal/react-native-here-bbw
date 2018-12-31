@@ -158,8 +158,8 @@ public class HereMapView extends MapView {
         }
     }
 
-    public void addMaker(String _maker) {
-        String[] values = _maker.split(",");
+    public void addMarker(String _marker) {
+        String[] values = _marker.split(",");
 
         if (values.length == 2) {
             double latitude = Double.parseDouble(values[0]);
@@ -179,7 +179,7 @@ public class HereMapView extends MapView {
             updatePin();
 
         } else {
-            Log.w(TAG, String.format("Invalid maker: %s", _maker));
+            Log.w(TAG, String.format("Invalid maker: %s", _marker));
         }
     }
 
