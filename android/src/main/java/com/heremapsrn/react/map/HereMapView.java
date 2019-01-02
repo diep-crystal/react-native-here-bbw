@@ -150,10 +150,8 @@ public class HereMapView extends MapView {
     }
 
     public void updatePin(){
-        if (map != null) {
-            if (currentPin != null) {
-                map.removeMapObject(currentPin);
-            }
+        if (map != null && currentPin != null) {
+            map.removeMapObject(currentPin);
             map.addMapObject(currentPin);
         }
     }
