@@ -49,15 +49,11 @@ public class HereMapView extends MapView {
                     map = new Map();
                     setMap(map);
 
-                    GeoCoordinate center = map.getCenter();
-                    Log.d(TAG, String.format("Map center: %s, %s",
-                            center.getLongitude(), center.getLongitude()));
-
                     map.setMapScheme(Map.Scheme.NORMAL_DAY);
 
                     mapIsReady = true;
 
-                    if (center != null) map.setCenter(mapCenter, Map.Animation.LINEAR);
+                    if (mapCenter != null) map.setCenter(mapCenter, Map.Animation.LINEAR);
 
                     enableMyLocation();
 
@@ -119,6 +115,8 @@ public class HereMapView extends MapView {
         String[] values = center.split(",");
 
         if (values.length == 2) {
+            Log.d(TAG, "======================= CENTER " + center);
+
             double latitude = Double.parseDouble(values[0]);
             double longitude = Double.parseDouble(values[1]);
 
