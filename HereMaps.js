@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import {
   View,
-  Button,
   NativeModules,
   requireNativeComponent,
   findNodeHandle,
@@ -41,6 +40,8 @@ class HereMaps extends React.Component {
     if (isReady) {
     }
 
+    this.mapViewHandle = findNodeHandle(this.mapViewRef);
+
     const EVENT_NAME = new NativeEventEmitter(UIManager);
     this.subscription = EVENT_NAME.addListener('HERE_MAP_ON_CHANGED',
       (location) => {
@@ -59,6 +60,13 @@ class HereMaps extends React.Component {
     }, 100);
   }
 
+  componentWillReceiveProps(newProps) {
+    // if (newProps.center !== this.props.center) {
+    //   console.log('onSetCenterPress')
+    //   this.onSetCenterPress()
+    // }
+  }
+
   render() {
     return (
       <View
@@ -66,6 +74,7 @@ class HereMaps extends React.Component {
         onTouchEnd={() => this.setState({ onTouchEnd: true })}
         style={this.props.style}>
         <HereMapView
+          ref={(mv) => this.mapViewRef = mv}
           style={this.props.style}
           center={this.props.center}
           marker={this.props.marker}
@@ -101,11 +110,8 @@ class HereMaps extends React.Component {
   }
 
   onSetCenterPress = () => {
-    this.setState({ center: this.state.center });
-    UIManager.dispatchViewManagerCommand(
-      findNodeHandle(this),
-      UIManager.HereMapView.Commands.setCenter,
-      [this.state.center]);
+    UIManager.dispatchViewManagerCommand(this.mapViewHandle,
+       UIManager.HereMapView.Commands.setCenter, [this.props.center]);
   }
 }
 HereMaps.propTypes = {
