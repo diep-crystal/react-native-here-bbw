@@ -78,7 +78,9 @@ class HereMaps extends React.Component {
           style={this.props.style}
           center={this.props.center}
           marker={this.props.marker}
+          markers={this.props.markers}
           mapType={this.props.mapType}
+          showsUserLocation={this.props.showsUserLocation}
           initialZoom={this.props.initialZoom} >
         </HereMapView>
       </View>
@@ -111,7 +113,7 @@ class HereMaps extends React.Component {
 
   onSetCenterPress = () => {
     UIManager.dispatchViewManagerCommand(this.mapViewHandle,
-       UIManager.HereMapView.Commands.setCenter, [this.props.center]);
+      UIManager.HereMapView.Commands.setCenter, [this.props.center]);
   }
 }
 HereMaps.propTypes = {
@@ -119,6 +121,8 @@ HereMaps.propTypes = {
   style: ViewPropTypes.style,
   center: PropTypes.string,
   marker: PropTypes.string,
+  markers: PropTypes.array,
+  showsUserLocation: PropTypes.bool,
   mapType: PropTypes.oneOf(Object.values(MAP_TYPES)),
   initialZoom: PropTypes.number
 };
