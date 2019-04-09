@@ -37,6 +37,11 @@ class HereMapModule extends ReactContextBaseJavaModule {
         Log.d(TAG, "======================= ZOOM " + zoomLevel);
     }
 
+    @ReactMethod
+    public void addMarkers( String[] _markers, String url) {
+
+    }
+
     public Activity getActivity() {
         return getCurrentActivity();
     }

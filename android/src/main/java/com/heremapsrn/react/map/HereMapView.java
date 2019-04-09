@@ -1,20 +1,39 @@
 package com.heremapsrn.react.map;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.PointF;
+import android.net.Uri;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 
+import com.facebook.common.executors.CallerThreadExecutor;
+import com.facebook.common.references.CloseableReference;
+import com.facebook.datasource.DataSource;
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.imagepipeline.core.ImagePipeline;
+import com.facebook.imagepipeline.datasource.BaseBitmapDataSubscriber;
+import com.facebook.imagepipeline.image.CloseableImage;
+import com.facebook.imagepipeline.request.ImageRequest;
+import com.facebook.imagepipeline.request.ImageRequestBuilder;
+import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
 import com.here.android.mpa.common.GeoCoordinate;
 import com.here.android.mpa.common.MapEngine;
 import com.here.android.mpa.common.OnEngineInitListener;
 import com.here.android.mpa.mapping.Map;
 import com.here.android.mpa.mapping.MapMarker;
+import com.here.android.mpa.mapping.MapObject;
 import com.here.android.mpa.mapping.MapState;
 import com.here.android.mpa.mapping.MapView;
-import com.here.android.mpa.mapping.PositionIndicator;
 import com.heremapsrn.R;
 
 import java.io.IOException;
+import java.util.ArrayList;
+
+import javax.annotation.Nullable;
 
 public class HereMapView extends MapView {
 
@@ -33,11 +52,13 @@ public class HereMapView extends MapView {
     private double zoomLevel = 15;
     private MapMarker currentPin;
     private HereCallback callback;
+    private ArrayList<MapObject> mapObjects;
+    private Context _context;
 
     public HereMapView(Context context, HereCallback callback) {
         super(context);
         this.callback = callback;
-
+        this._context = context;
         MapEngine.getInstance().init(context, new OnEngineInitListener() {
             @Override
             public void onEngineInitializationCompleted(Error error) {
@@ -152,6 +173,10 @@ public class HereMapView extends MapView {
             map.removeMapObject(currentPin);
             map.addMapObject(currentPin);
         }
+        if(map != null && mapObjects != null) {
+            map.removeMapObjects(mapObjects);
+            map.addMapObjects(mapObjects);
+        }
     }
 
     public void addMarker(String _marker) {
@@ -179,6 +204,52 @@ public class HereMapView extends MapView {
         }
     }
 
+    public void removeMapObjectOld() {
+        if(map != null && mapObjects != null && mapObjects.size() > 0) {
+            map.removeMapObjects(mapObjects);
+        }
+    }
+
+    public void addMarkers(ReadableArray _markers) {
+        // remove object old
+        Log.w(TAG, String.format("addMarkers %s", _markers));
+        this.removeMapObjectOld();
+        if(_markers == null) return;
+
+        mapObjects = new ArrayList<>();
+        for (int i = 0; i < _markers.size(); i++) {
+            ReadableMap values = _markers.getMap(i);
+
+            double latitude = values.getDouble("lat");
+            double longitude = values.getDouble("lng");
+            String title = values.getString("name");
+            String url = values.getString("avatar");
+            Log.w(TAG, String.format("Latitude %s", latitude));
+            Log.w(TAG, String.format("Longitude %s", longitude));
+            GeoCoordinate geo = new GeoCoordinate(latitude, longitude);
+            MapMarker _mapMarker = new MapMarker();
+           // _mapMarker.setTitle(title);
+           // _mapMarker.setDescription(title);
+            //
+            try {
+                //
+                if(url != null && (url.startsWith("http://") || url.startsWith("https://") ||
+                        url.startsWith("file://") || url.startsWith("asset://"))){
+                   this.setImage(url, geo, _mapMarker);
+                } else {
+                    //com.here.android.mpa.common.Image myImage = new com.here.android.mpa.common.Image();
+                    //myImage.setImageResource(R.mipmap.ic_pin_map);
+                    _mapMarker.setCoordinate(geo);
+                    mapObjects.add(_mapMarker);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+        this.updatePin();
+    }
+
     public void enableMyLocation() {
         // Create a custom marker image
         com.here.android.mpa.common.Image myImage = new com.here.android.mpa.common.Image();
@@ -188,7 +259,57 @@ public class HereMapView extends MapView {
             e.printStackTrace();
         }
 
-        map.getPositionIndicator().setVisible(true);
+       // map.getPositionIndicator().setVisible(true);
         map.getPositionIndicator().setMarker(myImage);
+    }
+
+    public void showUserLocation(Boolean isShow) {
+        if(map != null) {
+            map.getPositionIndicator().setVisible(isShow);
+        }
+    }
+
+    public void setImage(String url, final GeoCoordinate geo, final MapMarker _mapMarker) {
+
+        try {
+            ImageRequest imageRequest = ImageRequestBuilder
+                    .newBuilderWithSource(Uri.parse(url))
+                    .build();
+            ImagePipeline imagePipeline = Fresco.getImagePipeline();
+         final DataSource<CloseableReference<CloseableImage>> dataSource = imagePipeline.fetchDecodedImage(imageRequest, this._context);
+          dataSource.subscribe(new BaseBitmapDataSubscriber() {
+              @Override
+              protected void onNewResultImpl(@Nullable Bitmap bitmap) {
+                if(dataSource.isFinished() && bitmap != null) {
+                    com.here.android.mpa.common.Image myImage = new com.here.android.mpa.common.Image();
+//                    LinearLayout LL = new LinearLayout(_context);
+//                    LL.setOrientation(LinearLayout.VERTICAL);
+
+                    Bitmap _bitmap = Bitmap.createBitmap(bitmap);
+                    myImage.setBitmap(_bitmap);
+                    _mapMarker.setIcon(myImage);
+                    _mapMarker.setAnchorPoint(new PointF(_bitmap.getWidth() / 2, _bitmap.getHeight()));
+                    _mapMarker.setCoordinate(geo);
+
+                    mapObjects.add(_mapMarker);
+                    Log.w(TAG, "onNewResultImpl -> width: " + String.valueOf(bitmap.getWidth()) + ", height: " + String.valueOf(bitmap.getHeight()));
+                    dataSource.close();
+
+                    updatePin();
+                }
+              }
+
+              @Override
+              protected void onFailureImpl(DataSource<CloseableReference<CloseableImage>> dataSource) {
+                  if(dataSource != null) {
+                      dataSource.close();
+                  }
+              }
+          }, CallerThreadExecutor.getInstance());
+
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }

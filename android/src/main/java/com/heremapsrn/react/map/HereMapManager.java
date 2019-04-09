@@ -6,6 +6,7 @@ import com.facebook.infer.annotation.Assertions;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.uimanager.ThemedReactContext;
@@ -119,4 +120,15 @@ class HereMapManager extends ViewGroupManager<HereMapView> {
     public void addMarker(HereMapView view, @Nullable String marker) {
         view.addMarker(marker);
     }
+
+    @ReactProp(name = "markers")
+    public void addMarkers(HereMapView view, ReadableArray markers) {
+        view.addMarkers(markers);
+    }
+
+    @ReactProp(name = "showsUserLocation", defaultBoolean = true)
+    public void showUserLocation(HereMapView view, Boolean isShow) {
+        view.showUserLocation(isShow);
+    }
+
 }
